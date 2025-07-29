@@ -9,7 +9,7 @@ interface MongoError extends Error {
     code?: number | string;
 }
 
-const DB_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/dinu-fashion';
+const DB_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/dinu-Fashion';
 
         // Event listeners for connection status
         mongoose.connection.on('connected', () => {

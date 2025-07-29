@@ -2,7 +2,6 @@ import { Document, Schema, model, Model } from 'mongoose';
 
 // Interface for Product document
 export interface IProduct extends Document {
-    _id: number;
     name: string;
     description: string;
     price: number;
@@ -15,13 +14,12 @@ export interface IProduct extends Document {
 
 // Interface for Product model
 interface IProductModel extends Model<IProduct> {
-    // Static methods can be defined here
+    // Static methods can be defined here if needed
 }
 
 // Create the schema
 const productSchema = new Schema<IProduct, IProductModel>(
     {
-        _id: { type: Number },
         name: {
             type: String,
             required: true,
