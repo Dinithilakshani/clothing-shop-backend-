@@ -29,7 +29,7 @@ export interface IUserModel extends Model<IUserDocument> {
 // Create schema
 const userSchema = new Schema<IUserDocument, IUserModel>(
     {
-        _id: {
+        _id: { 
             type: Number,
             required: false
         },
@@ -91,16 +91,27 @@ const userSchema = new Schema<IUserDocument, IUserModel>(
 );
 
 
-// Set _id before saving if it's a new document
+// Set _id before saving if it's a new document and _id is not provided
 userSchema.pre('save', async function (this: IUserDocument, next) {
+    // Only proceed if this is a new document and _id is not already set
     if (this.isNew && !this._id) {
         try {
+            // Find the user with the highest _id
             const UserModel = this.constructor as unknown as Model<IUserDocument>;
-            const lastUser = await UserModel.findOne().sort({ _id: -1 });
+            const lastUser = await UserModel.findOne({}, { _id: 1 }, { sort: { _id: -1 } });
+            
+            // Set the new _id to be one more than the highest existing _id, or 1 if no users exist
             this._id = lastUser ? lastUser._id + 1 : 1;
+            
+            console.log(`Setting new user _id to: ${this._id}`);
             next();
         } catch (error) {
-            next(error as Error);
+            console.error('Error generating user _id:', error);
+            // If there's an error, set a default _id and continue
+            // This ensures we don't block user creation if ID generation fails
+            this._id = Date.now(); // Use timestamp as fallback ID
+            console.log(`Using fallback _id: ${this._id}`);
+            next();
         }
     } else {
         next();
@@ -128,19 +139,19 @@ userSchema.methods.comparePassword = async function(candidatePassword: string): 
             console.error('[Auth] No password provided for comparison');
             return false;
         }
-
+        
         if (!this.password) {
             console.error('[Auth] No stored password hash found for user:', this.email);
             return false;
         }
-
+        
         console.log('[Auth] Comparing password for user:', this.email);
         console.log('[Auth] Stored hash exists:', !!this.password);
         console.log('[Auth] Candidate password provided:', !!candidatePassword);
-
+        
         const isMatch = await bcrypt.compare(candidatePassword, this.password);
         console.log('[Auth] Password comparison result:', isMatch);
-
+        
         return isMatch;
     } catch (error) {
         console.error('[Auth] Error in comparePassword:', {
