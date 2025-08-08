@@ -1,35 +1,20 @@
 import { Document, Schema, model, Model, Types } from 'mongoose';
 import { IUser } from './user.model';
+import { Counter, ICounter } from './counter.model';
 
 // 1. Define interfaces
-export interface IOrderItem {
-    name: string;
-    price: number;
-}
-
 export interface IOrder extends Document {
     _id: number;
     userId: number;
     username: string;
-    items: IOrderItem[];
+    itemName: string;
+    itemPrice: number;
+    itemStatus: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
     status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
     totalPrice: number;
     createdAt: Date;
     updatedAt: Date;
 }
-
-// 2. Define counter schema and model
-interface ICounter extends Document {
-    _id: string;
-    seq: number;
-}
-
-const counterSchema = new Schema<ICounter>({
-    _id: { type: String, required: true },
-    seq: { type: Number, default: 1 }
-});
-
-const Counter = model<ICounter>('Counter', counterSchema);
 
 // 3. Define order schema
 const orderSchema = new Schema<IOrder>(
@@ -44,18 +29,19 @@ const orderSchema = new Schema<IOrder>(
             type: String,
             required: true
         },
-        items: [
-            {
-                name: { 
-                    type: String, 
-                    required: true 
-                },
-                price: { 
-                    type: Number, 
-                    required: true 
-                }
-            }
-        ],
+        itemName: {
+            type: String,
+            required: true
+        },
+        itemPrice: {
+            type: Number,
+            required: true
+        },
+        itemStatus: {
+            type: String,
+            enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+            default: 'pending'
+        },
         status: {
             type: String,
             enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],

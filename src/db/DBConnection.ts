@@ -11,25 +11,25 @@ interface MongoError extends Error {
 
 const DB_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/dinu-fashion';
 
-        // Event listeners for connection status
-        mongoose.connection.on('connected', () => {
-            if (mongoose.connection.db) {
-                console.log(`✅ MongoDB connected to database: ${mongoose.connection.db.databaseName}`);
-            } else {
-                console.log('✅ MongoDB connected');
-            }
-        });
+// Event listeners for connection status
+mongoose.connection.on('connected', () => {
+    if (mongoose.connection.db) {
+        console.log(`✅ MongoDB connected to database: ${mongoose.connection.db.databaseName}`);
+    } else {
+        console.log('✅ MongoDB connected');
+    }
+});
 
-        mongoose.connection.on('error', (error) => {
-            console.error('❌ MongoDB connection error:', error.message);
-        });
+mongoose.connection.on('error', (error) => {
+    console.error('❌ MongoDB connection error:', error.message);
+});
 
 const connectDB = async (): Promise<string> => {
     try {
         if (!DB_URI) {
             throw new Error('MongoDB connection string is not defined in environment variables');
         }
-        
+
         // Only log the masked connection string once
         if (!process.env.DB_CONNECTION_LOGGED) {
             const maskedUri = DB_URI.replace(/:[^:]+@/, ':***@');
@@ -47,13 +47,13 @@ const connectDB = async (): Promise<string> => {
         };
 
         await mongoose.connect(DB_URI, options);
-        
+
         // Get the database instance
         const db = mongoose.connection.db;
         if (!db) {
             throw new Error('Failed to get database instance');
         }
-        
+
         // Check if users collection exists, if not create it
         const collections = await db.listCollections({ name: 'users' }).toArray();
         if (collections.length === 0) {
@@ -62,16 +62,16 @@ const connectDB = async (): Promise<string> => {
         } else {
             console.log('Using existing users collection');
         }
-        
+
         // Ensure indexes are up to date with the current schema
         await mongoose.connection.syncIndexes();
         console.log('Ensured indexes are up to date with the current schema');
 
         return `MongoDB connected successfully to database "${db.databaseName}"`;
-  } catch (error) {
-    console.error('MongoDB connection error:', error);
-    process.exit(1);
-  }
+    } catch (error) {
+        console.error('MongoDB connection error:', error);
+        process.exit(1);
+    }
 };
 
 export default connectDB;
